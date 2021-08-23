@@ -1,5 +1,7 @@
 import java.io.File;  
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner; 
 
 public class hub
@@ -17,18 +19,13 @@ public class hub
     public static void main(String[] args) 
     {
         // reading in the file and populating 1D array
-        
-        /* 
         String inputFile = args[0];
 		int filterSize = Integer.parseInt(args[1]);
 		String outputFile = args[2];
-        */
-
-        int filterSize = 3; //Change to args later
-        float [] values = new float[10]; // remove later
+        float [] values = new float[10];
         try 
         {
-            File file = new File("sampleInput100.txt"); //change to args later
+            File file = new File(inputFile); //change to args later
             Scanner darkly = new Scanner(file);
             int loops = Integer.parseInt(darkly.nextLine());
             values = new float[loops];
@@ -88,6 +85,29 @@ public class hub
         }
         float parAverage = sum/20;
         System.out.println("Parallel median filtering took: " + parAverage + "s");
+
+        // Writing results to an output text file
+        try
+        {
+            filter = new experiment(values, filterSize);
+            filter.runParallelExperiment();
+            float[] parArray = filter.parArray();
+
+            File out = new File(outputFile);
+            out.createNewFile();
+            PrintWriter pw = new PrintWriter(out);
+            pw.println(parArray.length);
+            for(int i = 0; i < parArray.length; i++)
+            {
+                pw.println(i + " " + parArray[i]);
+            }
+            pw.close();
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
 }
