@@ -1,7 +1,6 @@
 import java.io.File;  
 import java.io.FileNotFoundException;
 import java.util.Scanner; 
-import java.util.concurrent.ForkJoinPool;
 
 public class hub
 {
@@ -13,18 +12,8 @@ public class hub
 	}
 	private static float toc()
     {
-		return (System.currentTimeMillis() - startTime) / 1000.0f; 
+		return (System.currentTimeMillis() - startTime); 
 	}
-
-    static final ForkJoinPool fjPool = new ForkJoinPool();
-    static float[] parallelFilter(float[] values, int sequencialThreshold, int filterWindow)
-    {
-        parallel filter = new parallel(values, sequencialThreshold, filterWindow);
-        fjPool.invoke(filter);
-        float[] output = filter.getValues();
-        return output;
-    }
-    
     public static void main(String[] args) 
     {
         // reading in the file and populating 1D array
@@ -39,7 +28,7 @@ public class hub
         float [] values = new float[10]; // remove later
         try 
         {
-            File file = new File("sampleInput1000000.txt"); //change to args later
+            File file = new File("sampleInput100.txt"); //change to args later
             Scanner darkly = new Scanner(file);
             int loops = Integer.parseInt(darkly.nextLine());
             values = new float[loops];
@@ -62,21 +51,43 @@ public class hub
             e.printStackTrace();
         }
 
+        // Instantiating experiment class
+        experiment filter; 
         // Running sequencial algorithm and timing the results
-        System.gc();
-        tick();
-        sequencial sqFilter = new sequencial(filterSize, values);
-        float seqTime = toc();
-        System.out.println("Sequential median filtering took: " + seqTime+"s");
-
+        float[] seqTimes = new float[20];
+        for(int i = 0; i < 20; i++)
+        {
+            filter = new experiment(values, filterSize);
+            System.gc();
+            tick();
+            filter.runSequencialExperiment();
+            seqTimes[i] = toc();
+        }
+        float sum = 0;
+        for(int i = 0; i < 20; i++)
+        {
+            sum += seqTimes[i];
+        }
+        float seqAverage = sum/20;
+        System.out.println("Sequencial median filtering took: " + seqAverage + "s");
 
         // Running parallel algorithm and timing the results
-        System.gc();
-        tick();
-        parallelFilter(values, 1, filterSize);
-        float parTime = toc();
-        System.out.println("Parallel median filtering took: " + parTime + "s");
-
+        float[] parTimes = new float[20];
+        for(int i = 0; i < 20; i++)
+        {
+            filter = new experiment(values, filterSize);
+            System.gc();
+            tick();
+            filter.runParallelExperiment();
+            parTimes[i] = toc();
+        }
+        sum = 0;
+        for(int j = 0; j < 20; j++)
+        {
+            sum += parTimes[j];
+        }
+        float parAverage = sum/20;
+        System.out.println("Parallel median filtering took: " + parAverage + "s");
     }
 
 }

@@ -1,42 +1,40 @@
 import java.util.Arrays;
-
-
 public class sequencial
 {
     float[] values;
     int filterSize; 
+    float[] output;
 
     public sequencial(int filterSize, float[] values)
     {
         this.filterSize = filterSize;
         this.values = values;
+        output = new float[values.length];
     }
 
     public float[] applyFilter()
     {
-        float[] output = new float[filterSize];
-        int window = (filterSize -1)/2;
+       float[] windowValues = new float[filterSize];
 
-        for(int i = 0; i < values.length; i++)
-        {
-            float[] windowValues = new float[filterSize];
-            if( i < window || i > (windowValues.length - window - 1)) 
+       //compensating for boundray values
+       for(int i = 0; i < Math.floor(filterSize/2); i++)
+       {
+            output[i] = values[i];
+            output[values.length - 1 - i] = values[values.length - 1- 1];
+       }
+       //inserting correct values into output array
+       for(int j = (int) Math.floor(filterSize/2), l = 0; j < values.length - Math.floor(filterSize/2); j++, l++)
+       {
+            int f = l;
+            for(int k = 0; k < filterSize; k++)
             {
-                output[i] = values[i];
+                windowValues[k] = values[f];
+                f++;
             }
-            else
-            {
-                for(int j = i - window; j < window + i + 1; j++)
-                {
-                    windowValues[j] = values[j];
-                }
-                Arrays.sort(windowValues);
-                
-                output[i] = windowValues[(windowValues.length - 1)/ 2];
-            }
-            
-        }
-        return output;
+            Arrays.sort(windowValues);
+            output[j] = windowValues[(filterSize -1)/2];
+       }
+       return output;
     }
 
 }
